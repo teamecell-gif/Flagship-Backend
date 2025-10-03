@@ -12,7 +12,7 @@ app.use(express.json());
 // DB connect
 connectDB();
 app.use(cors({
-  origin: "https://flagship.ecellvnit.org",  // your frontend URL
+  origin: ["http://localhost:5173","https://flagship.ecellvnit.org"],  // your frontend URL
   methods: ["GET", "POST"]
 }));
 

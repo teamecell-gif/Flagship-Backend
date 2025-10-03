@@ -9,4 +9,6 @@ const userSchema = new mongoose.Schema({
   ticketNo: String,
 }, { timestamps: true });
 
+userSchema.index({ name: 1, phone: 1 }, { unique: true });
+
 export const User = mongoose.model("User", userSchema);

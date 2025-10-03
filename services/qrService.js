@@ -36,10 +36,10 @@ export async function generateTicketPDFBuffer({ name, email, phone, college, tic
       doc.moveDown();
 
       // Custom Message
-      doc.fontSize(14).text("Congratulations for registering! ", { align: "center" });
+      doc.fontSize(14).text("You’re all set! Welcome to Flagship 25 – Trailblazers of Tomorrow. Get ready for an amazing experience!", { align: "center" });
       doc.moveDown();
       doc.text(
-        "We will be waiting for you at the Auditorium at 5:30 PM.\n" +
+        "We will be waiting for you at the Auditorium at 5:00 PM on\n 5th October 2025.\n" +
         "Please bring this ticket with you for entry.\n\n" +
         " This PDF is your ticket, show it at the counter and enter.",
         { align: "center" }

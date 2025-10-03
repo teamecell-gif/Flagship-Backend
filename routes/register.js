@@ -17,6 +17,11 @@ function generateTicket() {
 router.post("/", async (req, res) => {
   try {
     const { name, email, phone, college } = req.body;
+
+    const existingUser = await User.findOne({ name, phone });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Already Registered Check downloads For your ticket" });
+    }
     const ticketNo = generateTicket();
 
     // Save user in DB
