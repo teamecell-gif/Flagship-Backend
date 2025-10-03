@@ -1,41 +1,38 @@
+// routes/register.js
 import express from "express";
-const router = express.Router();
 import { User } from "../models/User.js";
-import {generateTicketNo} from "../utils/ticketGenerator.js";
+import { generateTicketPDFBuffer } from "../services/qrService.js";
 
-import { createQRCode } from "../services/qrService.js";
-import { createPdfBuffer } from "../services/pdfService.js";
-import { sendMail } from "../services/mailService.js";
+const router = express.Router();
+
+function generateTicket() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let ticket = "";
+  for (let i = 0; i < 4; i++) {
+    ticket += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return ticket;
+}
 
 router.post("/", async (req, res) => {
   try {
     const { name, email, phone, college } = req.body;
-    if (!name || !email || !phone || !college) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
+    const ticketNo = generateTicket();
 
-    // generate ticket
-    const ticketNo = await generateTicketNo();
+    // Save user in DB
+    const newUser = new User({ name, email, phone, college, ticketNo });
+    await newUser.save();
 
-    // save user
-    const user = new User({ name, email, phone, college, ticketNo });
-    await user.save();
+    // Generate PDF in memory
+    const pdfBuffer = await generateTicketPDFBuffer({ name, email, phone, college, ticketNo });
 
-    // make QR
-    const qrPayload = JSON.stringify({ name, email, phone, college, ticketNo });
-    const qrBuffer = await createQRCode(qrPayload);
-
-    // make PDF
-    const pdfBuffer = await createPdfBuffer({ name, email, phone, college, ticketNo, qrBuffer });
-
-    // send mail
-    await sendMail({ to: email, name, ticketNo, pdfBuffer });
-
-    res.json({ message: "Registration successful! Ticket sent to email.", ticketNo });
-
+    // Send PDF as download
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=Ticket-${ticketNo}.pdf`);
+    res.send(pdfBuffer);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error(" Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
